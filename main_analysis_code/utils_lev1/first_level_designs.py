@@ -211,11 +211,21 @@ def make_basic_ant_desmat(events_file, add_deriv,
               rt regressors are requeset.
     """
     events_df = pd.read_csv(events_file, sep = '\t')
-    events_df['too_fast'], events_df['commission'], events_df['omission'] = \
-        define_nuisance_trials(events_df, 'ANT')
-    subset_main_regressors = 'too_fast == 0 and commission == 0 and omission == 0 and onset > 0' 
-    events_df['constant_1_column'] = 1  
-    percent_too_fast = np.mean(events_df['too_fast'])
+    events_df, percent_junk = define_nuisance_trials(events_df, 'ANT')
+    subset_main_regressors = ('too_fast == 0 and commission == 0'
+                              'and omission == 0 and onset > 0') 
+    events_df['constant_1_column'] = 1
+
+    events_df['cue_parametric'] = 0
+    events_df.loc[events_df.cue == 'double', 'cue_parametric'] = 1
+    events_df.loc[events_df.cue == 'spatial', 'cue_parametric'] = -1
+
+    events_df['congruency_parametric'] = 0
+    events_df.loc[events_df.flanker_type == 'incongruent', 'congruency_parametric'] = 1
+    events_df.loc[events_df.flanker_type == 'congruent', 'congruency_parametric'] = -1
+
+    events_df['cue_congruency_interaction'] = events_df.cue_parametric.values *\
+                                              events_df.congruency_parametric.values
     too_fast_regressor = make_regressor_and_derivative(
             n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
             amplitude_column="too_fast", duration_column="constant_1_column",
@@ -231,37 +241,24 @@ def make_basic_ant_desmat(events_file, add_deriv,
             amplitude_column="commission", duration_column="constant_1_column",
             subset="onset > 0", demean_amp = False, cond_id = 'commission'
         )
-    rt_subset = "too_fast == 0 and onset > 0"
-    events_df['constant_column'] = events_df['constant_1_column'] 
-    events_df['cue_parametric'] = 0
-    events_df.loc[events_df.cue == 'double', 'cue_parametric'] = 1
-    events_df.loc[events_df.cue == 'spatial', 'cue_parametric'] = -1
-
-    events_df['congruency_parametric'] = 0
-    events_df.loc[events_df.flanker_type == 'incongruent', 'congruency_parametric'] = 1
-    events_df.loc[events_df.flanker_type == 'congruent', 'congruency_parametric'] = -1
-
-    events_df['cue_congruency_interaction'] = events_df.cue_parametric.values *\
-    events_df.congruency_parametric.values
-
     cue_parametric = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="cue_parametric", duration_column="constant_column",
+        amplitude_column="cue_parametric", duration_column="constant_1_column",
         subset=subset_main_regressors, demean_amp = True, cond_id = 'cue_parametric'
     )
     congruency_parametric = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="congruency_parametric", duration_column="constant_column",
+        amplitude_column="congruency_parametric", duration_column="constant_1_column",
         subset=subset_main_regressors, demean_amp=True, cond_id='congruency_parametric'
     )
     cue_congruency_interaction = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="cue_congruency_interaction", duration_column="constant_column",
+        amplitude_column="cue_congruency_interaction", duration_column="constant_1_column",
         subset=subset_main_regressors, demean_amp=True, cond_id='interaction'
     )
     all_trials = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="constant_1_column", duration_column="constant_column",
+        amplitude_column="constant_1_column", duration_column="constant_1_column",
         subset=subset_main_regressors, demean_amp=False, cond_id='task'
     )
     design_matrix = pd.concat([cue_parametric, congruency_parametric,
@@ -277,16 +274,16 @@ def make_basic_ant_desmat(events_file, add_deriv,
         events_df['response_time_centered'] = events_df.response_time - mn_rt
         rt = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="response_time_centered", duration_column="constant_column",
-        subset=rt_subset, demean_amp=False, cond_id='response_time'
+        amplitude_column="response_time_centered", duration_column="constant_1_column",
+        subset=subset_main_regressors, demean_amp=False, cond_id='response_time'
         ) 
         design_matrix = pd.concat([design_matrix, rt], axis=1)
         contrasts["response_time"] = "response_time"
     if regress_rt == 'rt_uncentered':
         rt = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="response_time", duration_column="constant_column",
-        subset=rt_subset, demean_amp=False, cond_id='response_time'
+        amplitude_column="response_time", duration_column="constant_1_column",
+        subset=subset_main_regressors, demean_amp=False, cond_id='response_time'
         ) 
         design_matrix = pd.concat([design_matrix, rt], axis=1)
         contrasts["response_time"] = "response_time"
