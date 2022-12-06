@@ -48,9 +48,9 @@ for task in tasks:
             for sub in subids:
                 outfile.write(
                     f"echo /oak/stanford/groups/russpold/data/uh2/"
-                    f"aim1_mumford/code/analyze_lev1.py {task} {sub} {rt_inc} --qa_only\n"
+                    f"aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev1.py {task} {sub} {rt_inc} --qa_only\n"
                     f"/oak/stanford/groups/russpold/data/uh2/"
-                    f"aim1_mumford/code/analyze_lev1.py {task} {sub} {rt_inc} --qa_only \n")
+                    f"aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev1.py {task} {sub} {rt_inc} --qa_only \n")
 
 
 
