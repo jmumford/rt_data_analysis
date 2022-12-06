@@ -21,6 +21,8 @@ task_vec = []
 total_key_press_1 =[]
 total_missing_rt = []
 total_both_key_press_and_missing = []
+total_trial_type_na = []
+neg_onsets = []
 for task in tasks:
     for sub in subs:
         file_path = glob.glob(
@@ -33,7 +35,9 @@ for task in tasks:
             total_key_press_1.append(np.sum(events_df.key_press == -1))
             total_missing_rt.append(np.sum(events_df.response_time.isnull()))
             total_both_key_press_and_missing.append(np.sum((events_df.key_press == -1) & (events_df.response_time.isnull())))
-
+            #total_trial_type_na.append(np.sum(events_df.trial_type.isnull()))
+            neg_onsets.append(np.sum(events_df.onset < 0))
+print(total_trial_type_na)
 print(np.sum(total_both_key_press_and_missing))
 print(np.sum(total_both_key_press_and_missing != total_missing_rt))
 print(np.sum(total_both_key_press_and_missing != total_key_press_1))
@@ -62,3 +66,22 @@ for sub in subs:
 print(np.max(max_planning_dur))
 print(np.max(max_num_zeros))
 print(np.min(min_num_zeros))
+
+
+
+
+
+
+subid = []
+num_first_trial = []
+for sub in subs:
+    file_path = glob.glob(
+            f'{root}/sub-s{sub}/ses-[0-9]/func/*twoByTwo*tsv'
+        )
+    if len(file_path) == 1:
+        events_df = pd.read_csv(file_path[0], sep = '\t')
+        num_first_trial.append(np.sum(events_df.first_trial_of_block > 0))
+        subid.append(sub)
+num_first_trial
+#Check two subjects 
+events1 = pd.read_csv(glob.glob(f'{root}/sub-s519/ses-[0-9]/func/*twoByTwo*tsv')[0], sep='\t')
