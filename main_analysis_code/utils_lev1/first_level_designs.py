@@ -533,8 +533,8 @@ def make_basic_two_by_two_desmat(events_file, add_deriv,
     cue_stay_100 = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
         amplitude_column="constant_1_column", duration_column="constant_1_column",
-        subset=subset_main_regressors + " and CTI == .100 and trial_type == 'cue_stay'", demean_amp=False, 
-        cond_id='cue_stay_100'
+        subset=subset_main_regressors + " and CTI == .100 and trial_type == 'cue_stay'", 
+        demean_amp=False, cond_id='cue_stay_100'
     )
     design_matrix = pd.concat([task_switch_900, task_stay_cue_switch_900, 
         cue_stay_900, task_switch_100, task_stay_cue_switch_100, cue_stay_100, 
@@ -604,50 +604,50 @@ def make_basic_watt3_desmat(events_file, add_deriv, regress_rt,
     planning_event = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
         amplitude_column="constant_1_column", duration_column="constant_3500ms_col",
-        subset="planning==1 and practice_main == 'PA' and onset > 0", 
+        subset="planning==1 and practice_main == 'PA'", 
         demean_amp=False, cond_id='planning_event'
     )
     planning_parametric = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
         amplitude_column="with_without", duration_column="constant_3500ms_col",
-        subset="planning==1 and practice_main == 'PA' and onset > 0", 
+        subset="planning==1 and practice_main == 'PA'", 
         demean_amp=True, cond_id='planning_parametric'
     )
     acting_event = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
         amplitude_column="constant_1_column", duration_column="constant_600ms_col",
-        subset="planning==0 and practice_main == 'PA' and onset > 0", 
+        subset="planning==0 and practice_main == 'PA'", 
         demean_amp=False, cond_id='acting_event'
     )
     acting_parametric = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
         amplitude_column="with_without", duration_column="constant_600ms_col",
-        subset="planning==0 and trial_id!='feedback' and practice_main == 'PA' and onset > 0", 
+        subset="planning==0 and trial_id!='feedback' and practice_main == 'PA'", 
         demean_amp=True, cond_id='acting_parametric'
     )
     feedback = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
         amplitude_column="constant_1_column", duration_column="block_duration",
-        subset="trial_id=='feedback' and practice_main == 'PA' and onset > 0", 
+        subset="trial_id=='feedback' and practice_main == 'PA'", 
         demean_amp=False, cond_id='feedback'
     )
     # Practice starts here:
     acting_event_practice = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
         amplitude_column="constant_1_column", duration_column="constant_600ms_col",
-        subset="planning==0 and practice_main == 'UA' and onset > 0", 
+        subset="planning==0 and practice_main == 'UA'", 
         demean_amp=False, cond_id='acting_event_practice'
     )
     acting_parametric_practice = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
         amplitude_column="with_without", duration_column="constant_600ms_col",
-        subset="planning==0 and trial_id!='feedback' and practice_main == 'UA' and onset > 0", 
+        subset="planning==0 and trial_id!='feedback' and practice_main == 'UA'", 
         demean_amp=True, cond_id='acting_parametric_practice'
     )
     feedback_practice = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
         amplitude_column="constant_1_column", duration_column="block_duration",
-        subset="trial_id=='feedback' and practice_main == 'UA' and onset > 0", demean_amp=False, 
+        subset="trial_id=='feedback' and practice_main == 'UA'", demean_amp=False, 
         cond_id='feedback_practice'
     )
     design_matrix = pd.concat([planning_event, planning_parametric, acting_event, 
@@ -683,50 +683,50 @@ def make_basic_discount_fix_desmat(events_file, add_deriv,
               rt regressors are requeset.
     """
     events_df = pd.read_csv(events_file, sep = '\t')
+    events_df, percent_junk = define_nuisance_trials(events_df, 'discountFix')
+    #commission and omission are all 0s by definition
+    subset_main_regressors = ('too_fast == 0')
     events_df['constant_1_column'] = 1  
-    events_df['too_fast'], _, _ = \
-        define_nuisance_trials(events_df, 'discountFix')
-    percent_junk = np.mean(events_df['too_fast'])
-    rt_subset = 'too_fast == 0 and onset > 0'
-    too_fast_regressor = make_regressor_and_derivative(
-            n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-            amplitude_column="too_fast", duration_column="constant_1_column",
-            subset="onset > 0", demean_amp = False, cond_id = 'too_fast'
-        )
-    events_df['constant_column'] = events_df['constant_1_column']
     events_df['choice_parametric'] = -1
     events_df.loc[events_df.trial_type == 'larger_later',
                   'choice_parametric'] = 1
+
+    too_fast_regressor = make_regressor_and_derivative(
+            n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
+            amplitude_column="too_fast", duration_column="constant_1_column",
+            subset=None, demean_amp = False, cond_id = 'too_fast'
+        )
     task = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="constant_1_column", duration_column="constant_column",
-        subset='too_fast == 0 and onset > 0', demean_amp=False, 
+        amplitude_column="constant_1_column", duration_column="constant_1_column",
+        subset='too_fast == 0', demean_amp=False, 
         cond_id='task'
     )
     choice = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="choice_parametric", duration_column="constant_column",
-        subset='too_fast == 0 and onset > 0', demean_amp=True, 
+        amplitude_column="choice_parametric", duration_column="constant_1_column",
+        subset='too_fast == 0', demean_amp=True, 
         cond_id='choice'
     )
-    design_matrix = pd.concat([task, choice, too_fast_regressor, confound_regressors], axis=1)
+    design_matrix = pd.concat([task, choice, too_fast_regressor, 
+        confound_regressors], axis=1)
     contrasts = {'task': 'task',
                  'choice': 'choice'}
     if regress_rt == 'rt_centered':
-        mn_rt = events_df['response_time'].mean()
+        mn_rt = events_df.query(subset_main_regressors)['response_time'].mean()
         events_df['response_time_centered'] = events_df.response_time - mn_rt
         rt = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="response_time_centered", duration_column="constant_column",
-        subset=rt_subset, demean_amp=False, cond_id='response_time'
+        amplitude_column="response_time_centered", duration_column="constant_1_column",
+        subset=subset_main_regressors, demean_amp=False, cond_id='response_time'
         ) 
         design_matrix = pd.concat([design_matrix, rt], axis=1)
         contrasts["response_time"] = "response_time"
     if regress_rt == 'rt_uncentered':
         rt = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="response_time", duration_column="constant_column",
-        subset=rt_subset, demean_amp=False, cond_id='response_time'
+        amplitude_column="response_time", duration_column="constant_1_column",
+        subset=subset_main_regressors, demean_amp=False, cond_id='response_time'
         ) 
         design_matrix = pd.concat([design_matrix, rt], axis=1)
         contrasts["response_time"] = "response_time"
@@ -749,50 +749,48 @@ def make_basic_dpx_desmat(events_file, add_deriv,
               rt regressors are requeset.
     """
     events_df = pd.read_csv(events_file, sep = '\t')
-    events_df['too_fast'], events_df['commission'], events_df['omission'] = \
-        define_nuisance_trials(events_df, 'DPX')
-    subset_main_regressors = 'too_fast == 0 and commission == 0 and omission == 0 and onset > 0' 
+    events_df, percent_junk = define_nuisance_trials(events_df, 'DPX')
+    subset_main_regressors = ('too_fast == 0 and commission == 0 and '
+                            'omission == 0')
     events_df['constant_1_column'] = 1  
     percent_junk = np.mean(events_df['too_fast'])
     too_fast_regressor = make_regressor_and_derivative(
             n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
             amplitude_column="too_fast", duration_column="constant_1_column",
-            subset="onset > 0", demean_amp = False, cond_id = 'too_fast'
+            subset=None, demean_amp = False, cond_id = 'too_fast'
         )
     commission_regressor = make_regressor_and_derivative(
             n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
             amplitude_column="commission", duration_column="constant_1_column",
-            subset="onset > 0", demean_amp = False, cond_id = 'commission'
+            subset=None, demean_amp = False, cond_id = 'commission'
         )
     omission_regressor = make_regressor_and_derivative(
             n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
             amplitude_column="omission", duration_column="constant_1_column",
-            subset="onset > 0", demean_amp = False, cond_id = 'omission'
+            subset=None, demean_amp = False, cond_id = 'omission'
         )
-    rt_subset = 'too_fast == 0 and onset > 0'
-    events_df['constant_column'] = events_df['constant_1_column']
     AX = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="constant_1_column", duration_column="constant_column",
-        subset="too_fast == False and condition == 'AX' and commission == 0 and omission == 0 and onset > 0", 
+        amplitude_column="constant_1_column", duration_column="constant_1_column",
+        subset=subset_main_regressors + " and condition == 'AX'", 
         demean_amp=False, cond_id='AX'
     )
     AY = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="constant_1_column", duration_column="constant_column",
-        subset="too_fast == False and commission == 0 and omission == 0 and condition == 'AY' and onset > 0", 
+        amplitude_column="constant_1_column", duration_column="constant_1_column",
+        subset=subset_main_regressors + " and condition == 'AY'", 
         demean_amp=False, cond_id='AY'
     )
     BX = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="constant_1_column", duration_column="constant_column",
-        subset="too_fast == False and commission == 0 and omission == 0 and condition == 'BX' and onset > 0", 
+        amplitude_column="constant_1_column", duration_column="constant_1_column",
+        subset=subset_main_regressors + " and condition == 'BX'", 
         demean_amp=False, cond_id='BX'
     )
     BY = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="constant_1_column", duration_column="constant_column",
-        subset="too_fast == False and commission == 0 and omission == 0 and condition == 'BY' and onset > 0", 
+        amplitude_column="constant_1_column", duration_column="constant_1_column",
+        subset=subset_main_regressors + " and condition == 'BY'", 
         demean_amp=False, cond_id='BY'
     )
     design_matrix = pd.concat([AX, AY, BX, BY, 
@@ -805,20 +803,20 @@ def make_basic_dpx_desmat(events_file, add_deriv,
                  'AY-BY': 'AY-BY', 
                  'BX-BY': 'BX-BY'}
     if regress_rt == 'rt_centered':
-        mn_rt = events_df.query(rt_subset)['response_time'].mean()
+        mn_rt = events_df.query(subset_main_regressors)['response_time'].mean()
         events_df['response_time_centered'] = events_df.response_time - mn_rt
         rt = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="response_time_centered", duration_column="constant_column",
-        subset=rt_subset, demean_amp=False, cond_id='response_time'
+        amplitude_column="response_time_centered", duration_column="constant_1_column",
+        subset=subset_main_regressors, demean_amp=False, cond_id='response_time'
         ) 
         design_matrix = pd.concat([design_matrix, rt], axis=1)
         contrasts["response_time"] = "response_time"
     if regress_rt == 'rt_uncentered':
         rt = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="response_time", duration_column="constant_column",
-        subset=rt_subset, demean_amp=False, cond_id='response_time'
+        amplitude_column="response_time", duration_column="constant_1_column",
+        subset=subset_main_regressors, demean_amp=False, cond_id='response_time'
         ) 
         design_matrix = pd.concat([design_matrix, rt], axis=1)
         contrasts["response_time"] = "response_time"
@@ -848,49 +846,49 @@ def make_basic_motor_selective_stop_desmat(events_file, add_deriv,
     too_fast_regressor = make_regressor_and_derivative(
             n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
             amplitude_column="too_fast", duration_column="constant_1_column",
-            subset="onset > 0", demean_amp = False, cond_id = 'too_fast'
+            subset=None, demean_amp = False, cond_id = 'too_fast'
         )
     commission_regressor = make_regressor_and_derivative(
             n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
             amplitude_column="commission", duration_column="constant_1_column",
-            subset="onset > 0", demean_amp = False, cond_id = 'commission'
+            subset=None, demean_amp = False, cond_id = 'commission'
         )
     omission_regressor = make_regressor_and_derivative(
             n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
             amplitude_column="omission", duration_column="constant_1_column",
-            subset="onset > 0", demean_amp = False, cond_id = 'omission'
+            subset=None, demean_amp = False, cond_id = 'omission'
         )
-    rt_subset = "too_fast == 0 & trial_type!='crit_stop_success' and onset > 0"
+    rt_subset = "too_fast == 0 & trial_type!='crit_stop_success'"
     ['crit_go', 'noncrit_nosignal', 'noncrit_signal']
     events_df['constant_column'] = events_df['constant_1_column']
     crit_go = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
         amplitude_column="constant_1_column", duration_column="constant_1_column",
-        subset="too_fast == 0 and commission == 0 and omission == 0  and trial_type == 'crit_go' and onset > 0", 
+        subset="too_fast == 0 and commission == 0 and omission == 0  and trial_type == 'crit_go'", 
         demean_amp=False, cond_id='crit_go'
     )
     crit_stop_success = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
         amplitude_column="constant_1_column", duration_column="constant_1_column",
-        subset="too_fast == 0 and commission == 0 and omission == 0 and trial_type == 'crit_stop_success' and onset > 0",
+        subset="too_fast == 0 and commission == 0 and omission == 0 and trial_type == 'crit_stop_success'",
         demean_amp=False, cond_id='crit_stop_success'
     )
     crit_stop_failure = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
         amplitude_column="constant_1_column", duration_column="constant_1_column",
-        subset="too_fast == 0 and commission == 0 and omission == 0 and trial_type == 'crit_stop_failure' and onset > 0", 
+        subset="too_fast == 0 and commission == 0 and omission == 0 and trial_type == 'crit_stop_failure'", 
         demean_amp=False, cond_id='crit_stop_failure'
     )
     noncrit_signal = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
         amplitude_column="constant_1_column", duration_column="constant_1_column",
-        subset="too_fast == 0 and commission == 0 and omission == 0 and trial_type == 'noncrit_signal' and onset > 0", 
+        subset="too_fast == 0 and commission == 0 and omission == 0 and trial_type == 'noncrit_signal'", 
         demean_amp=False, cond_id='noncrit_signal'
     )
     noncrit_nosignal = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
         amplitude_column="constant_1_column", duration_column="constant_1_column",
-        subset="too_fast == 0 and commission == 0 and omission == 0 and trial_type == 'noncrit_nosignal' and onset > 0", 
+        subset="too_fast == 0 and commission == 0 and omission == 0 and trial_type == 'noncrit_nosignal'", 
         demean_amp=False, cond_id='noncrit_nosignal'
     )
     design_matrix = pd.concat([crit_go, crit_stop_success, crit_stop_failure,
