@@ -14,7 +14,8 @@ tasks = ['stroop', 'ANT',  'stopSignal', 'twoByTwo',
 
 #tasks = ['twoByTwo']
 
-batch_stub = '/oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/run_stub.batch'
+batch_stub = ('/oak/stanford/groups/russpold/data/uh2/aim1_mumford/'
+              'rt_data_analysis/main_analysis_code/run_stub.batch')
 root = '/oak/stanford/groups/russpold/data/uh2/aim1/BIDS_scans'
 
 
