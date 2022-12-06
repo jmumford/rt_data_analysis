@@ -388,10 +388,10 @@ def make_basic_stopsignal_desmat(events_file, add_deriv,
               rt regressors are requeset.
     """
     events_df = pd.read_csv(events_file, sep = '\t')
-    events_df['too_fast'], events_df['commission'], events_df['omission'] = \
-        define_nuisance_trials(events_df, 'stopSignal')
+    events_df, percent_junk = define_nuisance_trials(events_df, 'stopSignal')
+    subset_main_regressors = ('too_fast == 0 and commission == 0 and '
+                            'omission == 0 and onset > 0')
     events_df['constant_1_column'] = 1  
-    percent_too_fast = np.mean(events_df['too_fast'])
     too_fast_regressor = make_regressor_and_derivative(
             n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
             amplitude_column="too_fast", duration_column="constant_1_column",
@@ -407,25 +407,23 @@ def make_basic_stopsignal_desmat(events_file, add_deriv,
             amplitude_column="commission", duration_column="constant_1_column",
             subset='onset > 0', demean_amp = False, cond_id = 'commission'
         )
-    rt_subset = 'too_fast == 0 and trial_type != "stop_success" and onset > 0'
-    events_df['constant_column'] = events_df['constant_1_column']
     go = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="constant_1_column", duration_column="constant_column",
-        subset="too_fast == 0 and trial_type == 'go' and onset > 0 and commission == 0 and omission == 0", demean_amp=False, 
-        cond_id='go'
+        amplitude_column="constant_1_column", duration_column="constant_1_column",
+        subset=subset_main_regressors + " and trial_type == 'go'", 
+        demean_amp=False, cond_id='go'
     )
     stop_success = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="constant_1_column", duration_column="constant_column",
-        subset="too_fast == 0 and trial_type == 'stop_success' and onset > 0 and commission == 0 and omission == 0", demean_amp=False, 
-        cond_id='stop_success'
+        amplitude_column="constant_1_column", duration_column="constant_1_column",
+        subset=subset_main_regressors + " and trial_type == 'stop_success'", 
+        demean_amp=False, cond_id='stop_success'
     )
     stop_failure = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="constant_1_column", duration_column="constant_column",
-        subset="too_fast == 0 and trial_type == 'stop_failure' and onset > 0 and commission == 0 and omission == 0", demean_amp=False, 
-        cond_id='stop_failure'
+        amplitude_column="constant_1_column", duration_column="constant_1_column",
+        subset=subset_main_regressors + " and trial_type == 'stop_failure'", 
+        demean_amp=False, cond_id='stop_failure'
     )
     design_matrix = pd.concat([go, stop_success, stop_failure, too_fast_regressor, 
         omission_regressor, commission_regressor, confound_regressors], axis=1)
@@ -439,19 +437,21 @@ def make_basic_stopsignal_desmat(events_file, add_deriv,
                   #  'task': '.333*go + .333*stop_failure + .333*stop_success'#
                   }
     if regress_rt == 'rt_centered':
+        rt_subset = subset_main_regressors + ' and trial_type != "stop_success"'
         mn_rt = events_df.query(rt_subset)['response_time'].mean()
         events_df['response_time_centered'] = events_df.response_time - mn_rt
         rt = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="response_time_centered", duration_column="constant_column",
+        amplitude_column="response_time_centered", duration_column="constant_1_column",
         subset=rt_subset, demean_amp=False, cond_id='response_time'
         ) 
         design_matrix = pd.concat([design_matrix, rt], axis=1)
         contrasts["response_time"] = "response_time"
     if regress_rt == 'rt_uncentered':
+        rt_subset = subset_main_regressors + ' and trial_type != "stop_success"'
         rt = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="response_time", duration_column="constant_column",
+        amplitude_column="response_time", duration_column="constant_1_column",
         subset=rt_subset, demean_amp=False, cond_id='response_time'
         ) 
         design_matrix = pd.concat([design_matrix, rt], axis=1)
