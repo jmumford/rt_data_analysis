@@ -685,7 +685,7 @@ def make_basic_discount_fix_desmat(events_file, add_deriv,
     events_df = pd.read_csv(events_file, sep = '\t')
     events_df, percent_junk = define_nuisance_trials(events_df, 'discountFix')
     #commission and omission are all 0s by definition
-    subset_main_regressors = ('too_fast == 0 and key_press ~= -1')
+    subset_main_regressors = ('too_fast == 0 and key_press != -1')
     events_df['constant_1_column'] = 1  
     events_df['choice_parametric'] = -1
     events_df.loc[events_df.trial_type == 'larger_later',
@@ -839,10 +839,9 @@ def make_basic_motor_selective_stop_desmat(events_file, add_deriv,
               rt regressors are requeset.
     """
     events_df = pd.read_csv(events_file, sep = '\t')
-    events_df['too_fast'], events_df['commission'], events_df['omission'] = \
-        define_nuisance_trials(events_df, 'motorSelectiveStop')
+    events_df, percent_junk = define_nuisance_trials(events_df, 'motorSelectiveStop')
+    subset_main_regressors = ('too_fast == 0 and commission == 0 and omission == 0')
     events_df['constant_1_column'] = 1  
-    percent_junk = np.mean(events_df['too_fast'])
     too_fast_regressor = make_regressor_and_derivative(
             n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
             amplitude_column="too_fast", duration_column="constant_1_column",
@@ -858,42 +857,39 @@ def make_basic_motor_selective_stop_desmat(events_file, add_deriv,
             amplitude_column="omission", duration_column="constant_1_column",
             subset=None, demean_amp = False, cond_id = 'omission'
         )
-    rt_subset = "too_fast == 0 & trial_type!='crit_stop_success'"
-    ['crit_go', 'noncrit_nosignal', 'noncrit_signal']
-    events_df['constant_column'] = events_df['constant_1_column']
     crit_go = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
         amplitude_column="constant_1_column", duration_column="constant_1_column",
-        subset="too_fast == 0 and commission == 0 and omission == 0  and trial_type == 'crit_go'", 
+        subset=subset_main_regressors + " and trial_type == 'crit_go'", 
         demean_amp=False, cond_id='crit_go'
     )
     crit_stop_success = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
         amplitude_column="constant_1_column", duration_column="constant_1_column",
-        subset="too_fast == 0 and commission == 0 and omission == 0 and trial_type == 'crit_stop_success'",
+        subset=subset_main_regressors + " and trial_type == 'crit_stop_success'",
         demean_amp=False, cond_id='crit_stop_success'
     )
     crit_stop_failure = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
         amplitude_column="constant_1_column", duration_column="constant_1_column",
-        subset="too_fast == 0 and commission == 0 and omission == 0 and trial_type == 'crit_stop_failure'", 
+        subset=subset_main_regressors + " and trial_type == 'crit_stop_failure'", 
         demean_amp=False, cond_id='crit_stop_failure'
     )
     noncrit_signal = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
         amplitude_column="constant_1_column", duration_column="constant_1_column",
-        subset="too_fast == 0 and commission == 0 and omission == 0 and trial_type == 'noncrit_signal'", 
+        subset=subset_main_regressors + " and trial_type == 'noncrit_signal'", 
         demean_amp=False, cond_id='noncrit_signal'
     )
     noncrit_nosignal = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
         amplitude_column="constant_1_column", duration_column="constant_1_column",
-        subset="too_fast == 0 and commission == 0 and omission == 0 and trial_type == 'noncrit_nosignal'", 
+        subset=subset_main_regressors + " and trial_type == 'noncrit_nosignal'", 
         demean_amp=False, cond_id='noncrit_nosignal'
     )
     design_matrix = pd.concat([crit_go, crit_stop_success, crit_stop_failure,
-        noncrit_signal, noncrit_nosignal,
-        too_fast_regressor, commission_regressor, omission_regressor, confound_regressors], axis=1)
+        noncrit_signal, noncrit_nosignal,too_fast_regressor, 
+        commission_regressor, omission_regressor, confound_regressors], axis=1)
     contrasts = {#'crit_go': 'crit_go',#
                  #'crit_stop_success': 'crit_stop_success',#
                  #'crit_stop_failure': 'crit_stop_failure',#
@@ -910,19 +906,21 @@ def make_basic_motor_selective_stop_desmat(events_file, add_deriv,
                  #        '.2*crit_stop_failure + .2*noncrit_signal + .2*noncrit_nosignal'
                  }
     if regress_rt == 'rt_centered':
+        rt_subset = subset_main_regressors + " and trial_type!='crit_stop_success'"
         mn_rt = events_df.query(rt_subset)['response_time'].mean()
         events_df['response_time_centered'] = events_df.response_time - mn_rt
         rt = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="response_time_centered", duration_column="constant_column",
+        amplitude_column="response_time_centered", duration_column="constant_1_column",
         subset=rt_subset, demean_amp=False, cond_id='response_time'
         ) 
         design_matrix = pd.concat([design_matrix, rt], axis=1)
         contrasts["response_time"] = "response_time"
     if regress_rt == 'rt_uncentered':
+        rt_subset = subset_main_regressors + " and trial_type!='crit_stop_success'"
         rt = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="response_time", duration_column="constant_column",
+        amplitude_column="response_time", duration_column="constant_1_column",
         subset=rt_subset, demean_amp=False, cond_id='response_time'
         ) 
         design_matrix = pd.concat([design_matrix, rt], axis=1)
