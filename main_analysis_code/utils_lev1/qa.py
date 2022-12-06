@@ -18,7 +18,7 @@ def get_behav_exclusion(subid, task):
     output: pandas data frame with any behavioral exclusions for this subject/task
     """
     behav_exclusion_file = ('/oak/stanford/groups/russpold/data/uh2/'
-        'aim1_mumford/code/utils_lev1/aim1_beh_subject_exclusions.csv')
+        'aim1_mumford/rt_data_analysis/main_analysis_code/utils_lev1/aim1_beh_subject_exclusions.csv')
     behav_exclusion = pd.read_csv(behav_exclusion_file)
     behav_exclusion.rename(columns={'Unnamed: 0': 'subid_task'}, inplace=True)
     behav_exclusion['subid_task'] = behav_exclusion['subid_task'].map(lambda x: x.lstrip('s'))
