@@ -475,10 +475,16 @@ def make_basic_two_by_two_desmat(events_file, add_deriv,
               rt regressors are requested.
     """
     events_df = pd.read_csv(events_file, sep = '\t')
-    events_df['too_fast'], events_df['commission'], events_df['omission'] = \
-        define_nuisance_trials(events_df, 'twoByTwo')
+    events_df, percent_junk = define_nuisance_trials(events_df, 'twoByTwo')
+    subset_main_regressors = ('too_fast == 0 and commission == 0 and '
+                            'omission == 0 and onset > 0')
     events_df['constant_1_column'] = 1  
-    percent_junk = np.mean(events_df['too_fast'])
+    events_df.trial_type = ['cue_'+c if c is not np.nan else 'task_'+t
+                            for c, t in zip(events_df.cue_switch,
+                                            events_df.task_switch)]
+    events_df.trial_type.replace('cue_switch', 'task_stay_cue_switch',
+                                inplace=True)
+
     too_fast_regressor = make_regressor_and_derivative(
             n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
             amplitude_column="too_fast", duration_column="constant_1_column",
@@ -494,47 +500,40 @@ def make_basic_two_by_two_desmat(events_file, add_deriv,
             amplitude_column="omission", duration_column="constant_1_column",
             subset="onset > 0", demean_amp = False, cond_id = 'omission'
         )
-    rt_subset = 'too_fast == 0 and onset > 0'
-    events_df['constant_column'] = events_df['constant_1_column']
-    events_df.trial_type = ['cue_'+c if c is not np.nan else 'task_'+t
-                            for c, t in zip(events_df.cue_switch,
-                                            events_df.task_switch)]
-    events_df.trial_type.replace('cue_switch', 'task_stay_cue_switch',
-                                inplace=True)
     task_switch_900 = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="constant_1_column", duration_column="constant_column",
-        subset="too_fast == 0 and onset > 0 and CTI == .900 and trial_type == 'task_switch'", demean_amp=False, 
-        cond_id='task_switch_900'
+        amplitude_column="constant_1_column", duration_column="constant_1_column",
+        subset=subset_main_regressors + " and CTI == .900 and trial_type == 'task_switch'", 
+        demean_amp=False, cond_id='task_switch_900'
     )
     task_stay_cue_switch_900 = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="constant_1_column", duration_column="constant_column",
-        subset="too_fast == 0  and commission == 0 and omission == 0 and onset > 0 and CTI == .900 and trial_type == 'task_stay_cue_switch'", demean_amp=False, 
-        cond_id='task_stay_cue_switch_900'
+        amplitude_column="constant_1_column", duration_column="constant_1_column",
+        subset=subset_main_regressors + " and CTI == .900 and trial_type == 'task_stay_cue_switch'",
+        demean_amp=False, cond_id='task_stay_cue_switch_900'
     )
     cue_stay_900 = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="constant_1_column", duration_column="constant_column",
-        subset="too_fast == 0 and commission == 0 and omission == 0 and onset > 0 and CTI == .900 and trial_type == 'cue_stay'", demean_amp=False, 
-        cond_id='cue_stay_900'
+        amplitude_column="constant_1_column", duration_column="constant_1_column",
+        subset=subset_main_regressors + " and CTI == .900 and trial_type == 'cue_stay'", 
+        demean_amp=False, cond_id='cue_stay_900'
     )
     task_switch_100 = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="constant_1_column", duration_column="constant_column",
-        subset="too_fast == 0  and commission == 0 and omission == 0 and onset > 0 and CTI == .100 and trial_type == 'task_switch'", demean_amp=False, 
-        cond_id='task_switch_100'
+        amplitude_column="constant_1_column", duration_column="constant_1_column",
+        subset=subset_main_regressors + " and CTI == .100 and trial_type == 'task_switch'", 
+        demean_amp=False, cond_id='task_switch_100'
     )
     task_stay_cue_switch_100 = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="constant_1_column", duration_column="constant_column",
-        subset="too_fast == 0  and commission == 0 and omission == 0 and onset > 0 and CTI == .100 and trial_type == 'task_stay_cue_switch'", demean_amp=False, 
-        cond_id='task_stay_cue_switch_100'
+        amplitude_column="constant_1_column", duration_column="constant_1_column",
+        subset=subset_main_regressors + " and CTI == .100 and trial_type == 'task_stay_cue_switch'", 
+        demean_amp=False, cond_id='task_stay_cue_switch_100'
     )
     cue_stay_100 = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="constant_1_column", duration_column="constant_column",
-        subset="too_fast == 0  and commission == 0 and omission == 0 and onset > 0 and CTI == .100 and trial_type == 'cue_stay'", demean_amp=False, 
+        amplitude_column="constant_1_column", duration_column="constant_1_column",
+        subset=subset_main_regressors + " and CTI == .100 and trial_type == 'cue_stay'", demean_amp=False, 
         cond_id='cue_stay_100'
     )
     design_matrix = pd.concat([task_switch_900, task_stay_cue_switch_900, 
@@ -555,20 +554,20 @@ def make_basic_two_by_two_desmat(events_file, add_deriv,
 #                #            ' 1/6*task_stay_cue_switch_100 + '
 #                #            '1/6*cue_stay_900 + 1/6*cue_stay_100'
     if regress_rt == 'rt_centered':
-        mn_rt = events_df.query(rt_subset)['response_time'].mean()
+        mn_rt = events_df.query(subset_main_regressors)['response_time'].mean()
         events_df['response_time_centered'] = events_df.response_time - mn_rt
         rt = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="response_time_centered", duration_column="constant_column",
-        subset=rt_subset, demean_amp=False, cond_id='response_time'
+        amplitude_column="response_time_centered", duration_column="constant_1_column",
+        subset=subset_main_regressors, demean_amp=False, cond_id='response_time'
         ) 
         design_matrix = pd.concat([design_matrix, rt], axis=1)
         contrasts["response_time"] = "response_time"
     if regress_rt == 'rt_uncentered':
         rt = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="response_time", duration_column="constant_column",
-        subset=rt_subset, demean_amp=False, cond_id='response_time'
+        amplitude_column="response_time", duration_column="constant_1_column",
+        subset=subset_main_regressors, demean_amp=False, cond_id='response_time'
         ) 
         design_matrix = pd.concat([design_matrix, rt], axis=1)
         contrasts["response_time"] = "response_time"
@@ -594,7 +593,6 @@ def make_basic_watt3_desmat(events_file, add_deriv, regress_rt,
     #no junk trial definition for this task
     percent_junk = 0
     events_df['constant_1_column'] = 1  
-    events_df['constant_column'] = events_df['constant_1_column']
     events_df['constant_3500ms_col'] = 3.5 * events_df['constant_1_column']
     events_df['constant_600ms_col'] = 0.6 * events_df['constant_1_column']
     events_df[['practice_main', 'with_without', 'not_using']] = \
@@ -630,8 +628,8 @@ def make_basic_watt3_desmat(events_file, add_deriv, regress_rt,
     feedback = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
         amplitude_column="constant_1_column", duration_column="block_duration",
-        subset="trial_id=='feedback' and practice_main == 'PA' and onset > 0", demean_amp=False, 
-        cond_id='feedback'
+        subset="trial_id=='feedback' and practice_main == 'PA' and onset > 0", 
+        demean_amp=False, cond_id='feedback'
     )
     # Practice starts here:
     acting_event_practice = make_regressor_and_derivative(
