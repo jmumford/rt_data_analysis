@@ -1,0 +1,16 @@
+#!/bin/bash
+##
+#SBATCH --job-name=JOBNAME
+#SBATCH --output=/oak/stanford/groups/russpold/data/uh2/aim1_mumford/sherlock_output/JOBNAME.out
+#SBATCH --error=/oak/stanford/groups/russpold/data/uh2/aim1_mumford/sherlock_output/JOBNAME.err
+#SBATCH --time=48:00:00
+#SBATCH -p russpold,hns,normal
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem-per-cpu=8G
+# Outputs ---------------------------------
+#SBATCH --mail-user=jeanette.mumford@gmail.com
+#SBATCH --mail-type=ALL
+# ------------------------------------------
+
+
