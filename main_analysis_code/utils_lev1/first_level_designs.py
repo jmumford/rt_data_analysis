@@ -685,7 +685,7 @@ def make_basic_discount_fix_desmat(events_file, add_deriv,
     events_df = pd.read_csv(events_file, sep = '\t')
     events_df, percent_junk = define_nuisance_trials(events_df, 'discountFix')
     #commission and omission are all 0s by definition
-    subset_main_regressors = ('too_fast == 0')
+    subset_main_regressors = ('too_fast == 0 and key_press ~= -1')
     events_df['constant_1_column'] = 1  
     events_df['choice_parametric'] = -1
     events_df.loc[events_df.trial_type == 'larger_later',

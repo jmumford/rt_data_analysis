@@ -1,5 +1,7 @@
 import glob
 from pathlib import Path
+import numpy as np
+import pandas as pd
 
 def get_subids(root):
     subdirs = glob.glob(f'{root}/s*/')
@@ -32,9 +34,9 @@ for task in tasks:
             total_missing_rt.append(np.sum(events_df.response_time.isnull()))
             total_both_key_press_and_missing.append(np.sum((events_df.key_press == -1) & (events_df.response_time.isnull())))
 
-
-np.sum(total_both_key_press_and_missing != total_missing_rt)
-np.sum(total_both_key_press_and_missing != total_total_key_press_1)
+print(np.sum(total_both_key_press_and_missing))
+print(np.sum(total_both_key_press_and_missing != total_missing_rt))
+print(np.sum(total_both_key_press_and_missing != total_key_press_1))
 
 
 max_planning_dur = []
