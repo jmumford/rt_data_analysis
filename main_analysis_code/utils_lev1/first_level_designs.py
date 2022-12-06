@@ -309,7 +309,6 @@ def make_basic_ccthot_desmat(events_file, add_deriv, regress_rt,
     # no junk trial definition for this task
     percent_junk = 0
     events_df['constant_1_column'] = 1  
-    events_df['constant_column'] = events_df['constant_1_column']
     end_round_idx = events_df.index[events_df.trial_id == 'ITI']
     # shift by 1 to next trial start, ignoring the last ITI
     start_round_idx = [0] + [x+1 for x in end_round_idx[:-1]]
@@ -335,7 +334,7 @@ def make_basic_ccthot_desmat(events_file, add_deriv, regress_rt,
     events_df['button_onset'] = events_df.onset+events_df.response_time
     pos_draw = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="EV", duration_column="constant_column",
+        amplitude_column="EV", duration_column="constant_1_column",
         onset_column='button_onset',
         subset='trial_start==True', demean_amp=True, 
         cond_id='positive_draw'
@@ -343,7 +342,7 @@ def make_basic_ccthot_desmat(events_file, add_deriv, regress_rt,
     events_df['absolute_loss_amount'] = np.abs(events_df.loss_amount)
     neg_draw = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
-        amplitude_column="absolute_loss_amount", duration_column="constant_column",
+        amplitude_column="absolute_loss_amount", duration_column="constant_1_column",
         onset_column='button_onset',
         subset="action=='draw_card' and feedback==0 and onset > 0", demean_amp=True, 
         cond_id='negative_draw'
