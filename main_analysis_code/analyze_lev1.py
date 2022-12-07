@@ -228,8 +228,8 @@ if __name__ == "__main__":
         contrast_dir, contrasts, design_matrix, subid, task, percent_junk, 
         percent_high_motion)
     
-    if qa_only == True:
-        add_to_html_summary(subid, contrasts, design_matrix, contrast_dir, 
+    
+    add_to_html_summary(subid, contrasts, design_matrix, contrast_dir, 
             regress_rt, task, any_fail, exclusion)
 
     if not any_fail and qa_only == False:
