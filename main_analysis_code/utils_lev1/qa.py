@@ -174,7 +174,26 @@ def get_all_contrast_vif(desmat, contrasts):
         vif_contrasts['VIF'].append(vif_out['VIF'][0]) 
     vif_contrasts = pd.DataFrame(vif_contrasts)
     return vif_contrasts  
-    
+
+
+def check_html_for_sub(subid, html_file):
+    """
+    Checks whether the sub info has already been added to html
+    input:
+        subid: subject ID
+        html_file: path to html output file
+    output:
+        already_done: T/F indicating if this subject was already done
+    """
+    html_file_pth = Path(html_file)
+    already_done = False
+    if html_file_pth.exists():
+        with open(html_file_pth) as myfile:
+            if f'subject {subid}' in myfile.read():
+                already_done = True
+    return already_done
+
+
 
 def add_to_html_summary(subid, contrasts, desmat, outdir, regress_rt, task, any_fail, exclusion):
     """
@@ -191,78 +210,80 @@ def add_to_html_summary(subid, contrasts, desmat, outdir, regress_rt, task, any_
     ouput:
         HTML file is updated
     """
-    desmat_fig = plot_design_matrix(desmat)
-    desmat_tmpfile = BytesIO()
-    desmat_fig.figure.savefig(desmat_tmpfile, format='png', dpi=60)
-    desmat_encoded = base64.b64encode(desmat_tmpfile.getvalue()).decode('utf-8')
-    if not any_fail:
-        html_desmat = f'<h2>{task} design for subject {subid}</h2>' + '<img src=\'data:image/png;base64,{}\'>'.format(desmat_encoded) + '<br>'
-    if any_fail:
-        html_desmat = f'<h2>FAIL, analysis skipped! <br> {exclusion.T.to_html()} <br> {task} design for subject {subid}</h2>' + '<img src=\'data:image/png;base64,{}\'>'.format(desmat_encoded) + '<br>'
+    html_file = (f'{outdir}/contrasts_task_{task}_rtmodel_{regress_rt}_model_summary.html') 
+    sub_already_done = (subid, html_file)
+    if sub_already_done == False:
+        desmat_fig = plot_design_matrix(desmat)
+        desmat_tmpfile = BytesIO()
+        desmat_fig.figure.savefig(desmat_tmpfile, format='png', dpi=60)
+        desmat_encoded = base64.b64encode(desmat_tmpfile.getvalue()).decode('utf-8')
+        if not any_fail:
+            html_desmat = f'<h2>{task} design for subject {subid}</h2>' + '<img src=\'data:image/png;base64,{}\'>'.format(desmat_encoded) + '<br>'
+        if any_fail:
+            html_desmat = f'<h2>FAIL, analysis skipped! <br> {exclusion.T.to_html()} <br> {task} design for subject {subid}</h2>' + '<img src=\'data:image/png;base64,{}\'>'.format(desmat_encoded) + '<br>'
 
-    design_column_names = desmat.columns.tolist()
-    contrast_matrix = []
-    for i, (key, values) in enumerate(contrasts.items()):
-        contrast_def = expression_to_contrast_vector(
-            values, design_column_names)
-        contrast_matrix.append(np.array(contrast_def))
-    contrast_matrix = np.asmatrix(np.asarray(contrast_matrix))
-    #maxval = np.max(np.abs(contrast_def))
-    maxval = 1
-    max_len = np.max([len(str(name)) for name in design_column_names])
+        design_column_names = desmat.columns.tolist()
+        contrast_matrix = []
+        for i, (key, values) in enumerate(contrasts.items()):
+            contrast_def = expression_to_contrast_vector(
+                values, design_column_names)
+            contrast_matrix.append(np.array(contrast_def))
+        contrast_matrix = np.asmatrix(np.asarray(contrast_matrix))
+        #maxval = np.max(np.abs(contrast_def))
+        maxval = 1
+        max_len = np.max([len(str(name)) for name in design_column_names])
 
-    plt.figure(figsize=(.4 * len(design_column_names),
-                            1 + .5 * contrast_matrix.shape[0] + .1 * max_len))
-    contrast_fig = plt.gca()
-    mat = contrast_fig.matshow(contrast_matrix, aspect='equal',
-                     cmap='gray', vmin=-maxval, vmax=maxval)
-    contrast_fig.set_label('conditions')
-    contrast_fig.set_ylabel('')
-    contrast_fig.set_yticks(list(range(len(contrasts))), list(contrasts.keys()))
-    contrast_fig.xaxis.set(ticks=np.arange(len(design_column_names)))
-    contrast_fig.set_xticklabels(design_column_names, rotation=50, ha='left')
-    plt.colorbar(mat, fraction=0.025, pad=0.08, shrink=.5)
-    plt.tight_layout()
-    contrast_tmpfile = BytesIO()
-    contrast_fig.figure.savefig(contrast_tmpfile, format='png', dpi=75)
-    contrast_encoded = base64.b64encode(contrast_tmpfile.getvalue()).decode('utf-8')
-    html_contrast = f'<h2>{task} contrasts for subject {subid}</h2>' + '<img src=\'data:image/png;base64,{}\'>'.format(contrast_encoded) + '<br>'
- 
-    desmat_vif = desmat
-    #[desmat.columns.drop(list(desmat.filter(regex=r'(reject)')))]
-    vif_data = est_vif(desmat_vif)
-    vif_data_table = vif_data[~vif_data.regressor.str.contains(r'(?:reject|trans|rot|comp_cor|non_steady)')]
-    vif_table = vif_data_table.to_html(index = False)
+        plt.figure(figsize=(.4 * len(design_column_names),
+                                1 + .5 * contrast_matrix.shape[0] + .1 * max_len))
+        contrast_fig = plt.gca()
+        mat = contrast_fig.matshow(contrast_matrix, aspect='equal',
+                        cmap='gray', vmin=-maxval, vmax=maxval)
+        contrast_fig.set_label('conditions')
+        contrast_fig.set_ylabel('')
+        contrast_fig.set_yticks(list(range(len(contrasts))), list(contrasts.keys()))
+        contrast_fig.xaxis.set(ticks=np.arange(len(design_column_names)))
+        contrast_fig.set_xticklabels(design_column_names, rotation=50, ha='left')
+        plt.colorbar(mat, fraction=0.025, pad=0.08, shrink=.5)
+        plt.tight_layout()
+        contrast_tmpfile = BytesIO()
+        contrast_fig.figure.savefig(contrast_tmpfile, format='png', dpi=75)
+        contrast_encoded = base64.b64encode(contrast_tmpfile.getvalue()).decode('utf-8')
+        html_contrast = f'<h2>{task} contrasts for subject {subid}</h2>' + '<img src=\'data:image/png;base64,{}\'>'.format(contrast_encoded) + '<br>'
+    
+        desmat_vif = desmat
+        vif_data = est_vif(desmat_vif)
+        vif_data_table = vif_data[~vif_data.regressor.str.contains(r'(?:reject|trans|rot|comp_cor|non_steady)')]
+        vif_table = vif_data_table.to_html(index = False)
 
-    vif_contrasts = get_all_contrast_vif(desmat, contrasts)
-    vif_contrasts_table = vif_contrasts.to_html(index = False)
+        vif_contrasts = get_all_contrast_vif(desmat, contrasts)
+        vif_contrasts_table = vif_contrasts.to_html(index = False)
 
-    corr_matrix = desmat.corr()
-    f,  heatmap= plt.subplots(figsize=(20,20)) 
-    heatmap = sns.heatmap(corr_matrix, 
-                      square = True,
-                      vmin=-1, vmax=1, center=0,
-                      cmap="coolwarm")
-    heatmap.set_xticklabels(
-        heatmap.get_xticklabels(),
-        rotation=45,
-        horizontalalignment='right'
-    )
-    cormat_tmpfile = BytesIO()
-    heatmap.figure.savefig(cormat_tmpfile, format='png', dpi=60)
-    cormat_encoded = base64.b64encode(cormat_tmpfile.getvalue()).decode('utf-8')
-    html_cormat = '<img src=\'data:image/png;base64,{}\'>'.format(cormat_encoded) + '<br>'
-    html_file = (f'{outdir}/contrasts_task_{task}_rtmodel_{regress_rt}_model_summary.html')
-    with open(html_file,'a') as f:
-        f.write('<hr>')
-        f.write(f'<h2>Subject {subid}</h2><br>')
-        f.write(html_desmat)
-        f.write(html_contrast) 
-        f.write(f'<h2>Variance inflation factors subject {subid}</h2><br>')
-        f.write(vif_table)
-        f.write(vif_contrasts_table)
-        f.write(html_cormat)
-    plt.close('all')
+        corr_matrix = desmat.corr()
+        f,  heatmap= plt.subplots(figsize=(20,20)) 
+        heatmap = sns.heatmap(corr_matrix, 
+                        square = True,
+                        vmin=-1, vmax=1, center=0,
+                        cmap="coolwarm")
+        heatmap.set_xticklabels(
+            heatmap.get_xticklabels(),
+            rotation=45,
+            horizontalalignment='right'
+        )
+        cormat_tmpfile = BytesIO()
+        heatmap.figure.savefig(cormat_tmpfile, format='png', dpi=60)
+        cormat_encoded = base64.b64encode(cormat_tmpfile.getvalue()).decode('utf-8')
+        html_cormat = '<img src=\'data:image/png;base64,{}\'>'.format(cormat_encoded) + '<br>'
+        
+        with open(html_file,'a') as f:
+            f.write('<hr>')
+            f.write(f'<h2>Subject {subid}</h2><br>')
+            f.write(html_desmat)
+            f.write(html_contrast) 
+            f.write(f'<h2>Variance inflation factors subject {subid}</h2><br>')
+            f.write(vif_table)
+            f.write(vif_contrasts_table)
+            f.write(html_cormat)
+        plt.close('all')
 
 
 def update_excluded_subject_csv(current_exclusion, subid, task, contrast_dir):
@@ -287,6 +308,8 @@ def update_excluded_subject_csv(current_exclusion, subid, task, contrast_dir):
         full_sub_exclusion['subid_task'] = f'{subid}_{task}'
         old_and_new_exclusion = pd.concat([old_exclusion_csv, full_sub_exclusion], axis = 0)
         old_and_new_exclusion.fillna(0, inplace=True)
+        #just in case this is run more than once
+        old_and_new_exclusion.drop_duplicates(inplace=True)
     else:
         old_and_new_exclusion = current_exclusion
     old_and_new_exclusion.to_csv(exclusion_out_path, index=False)
