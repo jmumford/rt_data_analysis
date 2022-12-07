@@ -211,7 +211,7 @@ def add_to_html_summary(subid, contrasts, desmat, outdir, regress_rt, task, any_
         HTML file is updated
     """
     html_file = (f'{outdir}/contrasts_task_{task}_rtmodel_{regress_rt}_model_summary.html') 
-    sub_already_done = (subid, html_file)
+    sub_already_done = check_html_for_sub(subid, html_file)
     if sub_already_done == False:
         desmat_fig = plot_design_matrix(desmat)
         desmat_tmpfile = BytesIO()
