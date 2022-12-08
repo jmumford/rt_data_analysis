@@ -352,17 +352,19 @@ def make_html_summary(
     from nilearn import masking
     from statsmodels.stats.outliers_influence import variance_inflation_factor
 
-    total_n = len(bold_files_final)
-    if summary_missing is not None:
-        start_n = len(get_subids(root))
-        num_missing = summary_missing.shape[0]
-        top_message = (f'<h1>Pre analysis summary</h1><br> <h2>Started with N={start_n}, '
-                       f'lost {num_missing} due to missing regressor info, final '
-                       f'N={total_n}</h2><br> <h2> Summary of who is missing and why </h2><br>')
-        top_message_missing = summary_missing.transpose().to_html()
-    else:
-        top_message = f'<h1>Pre analysis summary</h1><br> Total N={total_n}<br>'
-        top_message_missing = '<br>'
+    num_missing = summary_missing.shape[0]
+    num_con_est = len(bold_files_final)
+    total_n = 110 - num_missing
+
+    num_missing = summary_missing.shape[0]
+    top_message = (f'<h1>Pre analysis summary</h1><br> <h2>Started with N=110, '
+                       f'lost {num_missing} for various reasonse (see table), final '
+                       f'Number of lower level contrasts = {num_con_est}.'
+                       f'<br>If 110-(number expected missing) is not the same as '
+                       f'the number of contrasts [{110-num_missing}?=?{num_con_est}],  '
+                       f'check level 1 analyses.</h2>'
+                       f'<br> <h2> Summary of who is missing and why </h2><br>')
+    top_message_missing = summary_missing.round(decimals=3).transpose().to_html(index=False)
 
     desmat_pandas = pd.DataFrame(desmat_final, columns = regressor_names)
   
@@ -517,7 +519,7 @@ if __name__ == "__main__":
     lev1_task_contrast = opts.lev1_task_contrast
     model_lev2 = opts.model_lev2
 
-    batch_stub = '/oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/run_stub.batch'
+    batch_stub = '/oak/stanford/groups/russpold/data/uh2/aim1_mumford/rt_data_analysis/main_analysis_code/run_stub.batch'
     root = '/oak/stanford/groups/russpold/data/uh2/aim1/BIDS'
     task, lev1_contrast, rtmodel =  lev1_task_contrast.split(':')
 
