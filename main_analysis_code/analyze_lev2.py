@@ -210,7 +210,7 @@ def build_desmat_all(
         rows_with_missing = np.isnan(desmat_all).any(axis = 1)
         desmat_final = desmat_all[~rows_with_missing, :]
         #desmat_final = desmat_final - desmat_final.mean(axis = 0, keepdims=True)
-        desmat_final[:,0] = 1
+        #desmat_final[:,0] = 1
         bold_files_final = np.array(bold_files)[~rows_with_missing]
         if np.sum(rows_with_missing) > 0:
             summary_missing = pd.DataFrame(desmat_all[rows_with_missing, :],
@@ -221,7 +221,7 @@ def build_desmat_all(
             summary_missing.drop('intercept', axis=1, inplace=True)
             summary_missing = pd.merge(excluded_subjects, summary_missing, on =['subid', 'task'], how = 'outer')
         else:
-            summary_missing = None    
+            summary_missing = excluded_subjects    
     else:
         desmat_final = None
         regressor_names = None
