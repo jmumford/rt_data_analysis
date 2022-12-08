@@ -364,7 +364,7 @@ def make_html_summary(
                        f'the number of contrasts [{110-num_missing}?=?{num_con_est}],  '
                        f'check level 1 analyses.</h2>'
                        f'<br> <h2> Summary of who is missing and why </h2><br>')
-    top_message_missing = summary_missing.round(decimals=3).transpose().to_html(index=False)
+    top_message_missing = summary_missing.round(decimals=3).transpose().to_html()
 
     desmat_pandas = pd.DataFrame(desmat_final, columns = regressor_names)
   
