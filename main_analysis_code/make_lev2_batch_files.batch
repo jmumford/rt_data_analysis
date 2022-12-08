@@ -14,25 +14,25 @@
 # ------------------------------------------
 
 
-echo /oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/analyze_lev2.py stroop:stroop_incong_minus_cong:no_rt rt_diff
-/oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/analyze_lev2.py stroop:stroop_incong_minus_cong:no_rt rt_diff
-echo /oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/analyze_lev2.py stroop:stroop_incong_minus_cong:rt_uncentered rt_diff
-/oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/analyze_lev2.py stroop:stroop_incong_minus_cong:rt_uncentered rt_diff
-echo /oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/analyze_lev2.py stroop:stroop_incong_minus_cong:no_rt one_sampt
-/oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/analyze_lev2.py stroop:stroop_incong_minus_cong:no_rt one_sampt
-echo /oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/analyze_lev2.py stroop:stroop_incong_minus_cong:rt_uncentered one_sampt
-/oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/analyze_lev2.py stroop:stroop_incong_minus_cong:rt_uncentered one_sampt 
-echo /oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/analyze_lev2.py ANT:response_time:rt_uncentered one_sampt
-/oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/analyze_lev2.py ANT:response_time:rt_uncentered one_sampt   
-echo /oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/analyze_lev2.py DPX:response_time:rt_uncentered one_sampt
-/oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/analyze_lev2.py DPX:response_time:rt_uncentered one_sampt   
-echo /oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/analyze_lev2.py discountFix:response_time:rt_uncentered one_sampt
-/oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/analyze_lev2.py discountFix:response_time:rt_uncentered one_sampt   
-echo /oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/analyze_lev2.py motorSelectiveStop:response_time:rt_uncentered one_sampt
-/oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/analyze_lev2.py motorSelectiveStop:response_time:rt_uncentered one_sampt
-echo /oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/analyze_lev2.py stopSignal:response_time:rt_uncentered one_sampt
-/oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/analyze_lev2.py stopSignal:response_time:rt_uncentered one_sampt  
-echo /oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/analyze_lev2.py stroop:response_time:rt_uncentered one_sampt
-/oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/analyze_lev2.py stroop:response_time:rt_uncentered one_sampt
-echo /oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/analyze_lev2.py twoByTwo:response_time:rt_uncentered one_sampt
-/oak/stanford/groups/russpold/data/uh2/aim1_mumford/code/analyze_lev2.py twoByTwo:response_time:rt_uncentered one_sampt          
+echo /oak/stanford/groups/russpold/data/uh2/aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py stroop:stroop_incong_minus_cong:no_rt rt_diff
+/oak/stanford/groups/russpold/data/uh2/aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py stroop:stroop_incong_minus_cong:no_rt rt_diff
+echo /oak/stanford/groups/russpold/data/uh2/aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py stroop:stroop_incong_minus_cong:rt_uncentered rt_diff
+/oak/stanford/groups/russpold/data/uh2/aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py stroop:stroop_incong_minus_cong:rt_uncentered rt_diff
+echo /oak/stanford/groups/russpold/data/uh2/aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py stroop:stroop_incong_minus_cong:no_rt one_sampt
+/oak/stanford/groups/russpold/data/uh2/aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py stroop:stroop_incong_minus_cong:no_rt one_sampt
+echo /oak/stanford/groups/russpold/data/uh2/aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py stroop:stroop_incong_minus_cong:rt_uncentered one_sampt
+/oak/stanford/groups/russpold/data/uh2/aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py stroop:stroop_incong_minus_cong:rt_uncentered one_sampt 
+echo /oak/stanford/groups/russpold/data/uh2/aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py ANT:response_time:rt_uncentered one_sampt
+/oak/stanford/groups/russpold/data/uh2/aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py ANT:response_time:rt_uncentered one_sampt   
+echo /oak/stanford/groups/russpold/data/uh2/aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py DPX:response_time:rt_uncentered one_sampt
+/oak/stanford/groups/russpold/data/uh2/aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py DPX:response_time:rt_uncentered one_sampt   
+echo /oak/stanford/groups/russpold/data/uh2/aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py discountFix:response_time:rt_uncentered one_sampt
+/oak/stanford/groups/russpold/data/uh2/aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py discountFix:response_time:rt_uncentered one_sampt   
+echo /oak/stanford/groups/russpold/data/uh2/aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py motorSelectiveStop:response_time:rt_uncentered one_sampt
+/oak/stanford/groups/russpold/data/uh2/aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py motorSelectiveStop:response_time:rt_uncentered one_sampt
+echo /oak/stanford/groups/russpold/data/uh2/aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py stopSignal:response_time:rt_uncentered one_sampt
+/oak/stanford/groups/russpold/data/uh2/aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py stopSignal:response_time:rt_uncentered one_sampt  
+echo /oak/stanford/groups/russpold/data/uh2/aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py stroop:response_time:rt_uncentered one_sampt
+/oak/stanford/groups/russpold/data/uh2/aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py stroop:response_time:rt_uncentered one_sampt
+echo /oak/stanford/groups/russpold/data/uh2/aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py twoByTwo:response_time:rt_uncentered one_sampt
+/oak/stanford/groups/russpold/data/uh2/aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py twoByTwo:response_time:rt_uncentered one_sampt          

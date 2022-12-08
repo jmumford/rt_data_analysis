@@ -31,6 +31,7 @@ diff_array = np.array(diff_btwn)
 dirs_array = np.array(dirs)
 dirs_array[diff_array != 0]
 
+
 all_subs = set(get_subids(root))
 dir = dirs_array[diff_array != 0][0]
 csv_file = glob.glob(f'{dir}/*csv')[0]
