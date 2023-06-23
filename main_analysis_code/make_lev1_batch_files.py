@@ -9,29 +9,34 @@ def get_subids(root):
     return subid
 
 
-tasks = ['stroop', 'ANT',  'stopSignal', 'twoByTwo',
-                 'discountFix', 'DPX', 'motorSelectiveStop','CCTHot', 'WATT3']
+#tasks = ['stroop', 'ANT',  'stopSignal', 'twoByTwo',
+#                 'discountFix', 'DPX', 'motorSelectiveStop','CCTHot', 'WATT3']
 
-#tasks = ['twoByTwo']
+tasks = ['stroop', 'ANT',  'stopSignal', 'twoByTwo',
+                 'discountFix', 'DPX', 'motorSelectiveStop']
+
+tasks = ['DPX']
 
 batch_stub = ('/oak/stanford/groups/russpold/data/uh2/aim1_mumford/'
               'rt_data_analysis/main_analysis_code/run_stub.batch')
-root = '/oak/stanford/groups/russpold/data/uh2/aim1/BIDS_scans'
+root = '/oak/stanford/groups/russpold/data/uh2/aim1/BIDS'
 
 
 # For Jeanette's study no_rt is studied.  For other studies, use rt_yes unless
 # modeling WATT3 and CCTHot as RT doesn't make sense in those paradigms
 rt_mapping = {
-    'stroop': ['rt_uncentered', 'no_rt'],
-    'ANT': ['rt_uncentered', 'no_rt'],
+    'stroop': ['rt_uncentered', 'no_rt', 'rt_duration'],
+    'ANT': ['rt_uncentered', 'no_rt', 'rt_duration'],
     'CCTHot': ['no_rt'], 
-    'stopSignal':['rt_uncentered', 'no_rt'], 
-    'twoByTwo': ['rt_uncentered', 'no_rt'], 
+    'stopSignal':['rt_uncentered', 'no_rt', 'rt_duration'], 
+    'twoByTwo': ['rt_uncentered', 'no_rt', 'rt_duration'], 
     'WATT3': ['no_rt'],
-    'discountFix': ['rt_uncentered', 'no_rt'], 
-    'DPX': ['rt_uncentered', 'no_rt'], 
-    'motorSelectiveStop': [ 'rt_uncentered', 'no_rt']
+    'discountFix': ['rt_uncentered', 'no_rt', 'rt_duration'], 
+    'DPX': ['rt_uncentered', 'no_rt', 'rt_duration'], 
+    'motorSelectiveStop': [ 'rt_uncentered', 'no_rt', 'rt_duration']
 }
+
+rt_mapping = {'DPX': ['rt_duration_only']}
 
 subids = get_subids(root)
 

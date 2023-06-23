@@ -141,6 +141,8 @@ def make_basic_stroop_desmat(
     events_df['congruent'] = 0
     events_df.loc[events_df.trial_type == 'congruent', 'congruent'] = 1
     subset_main_regressors = 'too_fast == 0 and commission == 0 and omission == 0 and onset > 0' 
+    subset_main_regressors_congruent = 'too_fast == 0 and commission == 0 and omission == 0 and onset > 0 and congruent == 1'
+    subset_main_regressors_incongruent = 'too_fast == 0 and commission == 0 and omission == 0 and onset > 0 and incongruent == 1'
 
     too_fast_regressor = make_regressor_and_derivative(
             n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
@@ -192,6 +194,31 @@ def make_basic_stroop_desmat(
         ) 
         design_matrix = pd.concat([design_matrix, rt], axis=1)
         contrasts["response_time"] = "response_time"
+    if regress_rt == 'rt_duration':
+        rt = make_regressor_and_derivative(
+        n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
+        amplitude_column="constant_1_column", duration_column="response_time",
+        subset=subset_main_regressors, demean_amp=False, cond_id='response_time'
+        ) 
+        design_matrix = pd.concat([design_matrix, rt], axis=1)
+        contrasts["response_time"] = "response_time"
+    if regress_rt == 'rt_duration_only':
+        rt_congruent = make_regressor_and_derivative(
+        n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
+        amplitude_column="constant_1_column", duration_column="response_time",
+        subset=subset_main_regressors_congruent, demean_amp=False, cond_id='congruent_rtdur'
+        ) 
+        rt_incongruent = make_regressor_and_derivative(
+        n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
+        amplitude_column="constant_1_column", duration_column="response_time",
+        subset=subset_main_regressors_incongruent, demean_amp=False, cond_id='incongruent_rtdur'
+        )
+        design_matrix = pd.concat([rt_congruent, rt_incongruent,
+        too_fast_regressor, omission_regressor, commission_regressor, confound_regressors], axis=1)
+        contrasts = {
+        "stroop_incong_rtdur_minus_cong_rtdur": "incongruent_rtdur - congruent_rtdur"
+        }
+    
     return design_matrix, contrasts, percent_junk
 
 
@@ -283,6 +310,14 @@ def make_basic_ant_desmat(events_file, add_deriv,
         rt = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
         amplitude_column="response_time", duration_column="constant_1_column",
+        subset=subset_main_regressors, demean_amp=False, cond_id='response_time'
+        ) 
+        design_matrix = pd.concat([design_matrix, rt], axis=1)
+        contrasts["response_time"] = "response_time"
+    if regress_rt == 'rt_duration':
+        rt = make_regressor_and_derivative(
+        n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
+        amplitude_column="constant_1_column", duration_column="response_time",
         subset=subset_main_regressors, demean_amp=False, cond_id='response_time'
         ) 
         design_matrix = pd.concat([design_matrix, rt], axis=1)
@@ -456,6 +491,15 @@ def make_basic_stopsignal_desmat(events_file, add_deriv,
         ) 
         design_matrix = pd.concat([design_matrix, rt], axis=1)
         contrasts["response_time"] = "response_time"
+    if regress_rt == 'rt_duration':
+        rt_subset = subset_main_regressors + ' and trial_type != "stop_success"'
+        rt = make_regressor_and_derivative(
+        n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
+        amplitude_column="constant_1_column", duration_column="response_time",
+        subset=rt_subset, demean_amp=False, cond_id='response_time'
+        ) 
+        design_matrix = pd.concat([design_matrix, rt], axis=1)
+        contrasts["response_time"] = "response_time"
     return design_matrix, contrasts, percent_junk
 
 
@@ -567,6 +611,14 @@ def make_basic_two_by_two_desmat(events_file, add_deriv,
         rt = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
         amplitude_column="response_time", duration_column="constant_1_column",
+        subset=subset_main_regressors, demean_amp=False, cond_id='response_time'
+        ) 
+        design_matrix = pd.concat([design_matrix, rt], axis=1)
+        contrasts["response_time"] = "response_time"
+    if regress_rt == 'rt_duration':
+        rt = make_regressor_and_derivative(
+        n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
+        amplitude_column="constant_1_column", duration_column="response_time",
         subset=subset_main_regressors, demean_amp=False, cond_id='response_time'
         ) 
         design_matrix = pd.concat([design_matrix, rt], axis=1)
@@ -730,6 +782,14 @@ def make_basic_discount_fix_desmat(events_file, add_deriv,
         ) 
         design_matrix = pd.concat([design_matrix, rt], axis=1)
         contrasts["response_time"] = "response_time"
+    if regress_rt == 'rt_duration':
+        rt = make_regressor_and_derivative(
+        n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
+        amplitude_column="constant_1_column", duration_column="response_time",
+        subset=subset_main_regressors, demean_amp=False, cond_id='response_time'
+        ) 
+        design_matrix = pd.concat([design_matrix, rt], axis=1)
+        contrasts["response_time"] = "response_time"
     return design_matrix, contrasts, percent_junk
 
 
@@ -820,6 +880,39 @@ def make_basic_dpx_desmat(events_file, add_deriv,
         ) 
         design_matrix = pd.concat([design_matrix, rt], axis=1)
         contrasts["response_time"] = "response_time"
+    if regress_rt == 'rt_duration':
+        rt = make_regressor_and_derivative(
+        n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
+        amplitude_column="constant_1_column", duration_column="response_time",
+        subset=subset_main_regressors, demean_amp=False, cond_id='response_time'
+        ) 
+        design_matrix = pd.concat([design_matrix, rt], axis=1)
+        contrasts["response_time"] = "response_time"
+    if regress_rt == 'rt_duration_only':
+        rt_AX = make_regressor_and_derivative(
+        n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
+        amplitude_column="constant_1_column", duration_column="response_time",
+        subset=subset_main_regressors + " and condition == 'AX'", demean_amp=False, cond_id='ax_rtdur'
+        ) 
+        rt_AY = make_regressor_and_derivative(
+        n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
+        amplitude_column="constant_1_column", duration_column="response_time",
+        subset=subset_main_regressors + " and condition == 'AY'", demean_amp=False, cond_id='ay_rtdur'
+        )
+        rt_BX = make_regressor_and_derivative(
+        n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
+        amplitude_column="constant_1_column", duration_column="response_time",
+        subset=subset_main_regressors + " and condition == 'BX'", demean_amp=False, cond_id='bx_rtdur'
+        ) 
+        rt_BY = make_regressor_and_derivative(
+        n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
+        amplitude_column="constant_1_column", duration_column="response_time",
+        subset=subset_main_regressors + " and condition == 'BY'", demean_amp=False, cond_id='by_rtdur'
+        )
+        design_matrix = pd.concat([rt_AX, rt_AY, rt_BX, rt_BY, 
+        too_fast_regressor, commission_regressor, omission_regressor, confound_regressors], axis=1)
+        contrasts = {'AY_rtdur-BY_rtdur': 'ay_rtdur-by_rtdur', 
+                 'BX_rtdur-BY_rtdur': 'bx_rtdur-by_rtdur'}
     return design_matrix, contrasts, percent_junk
 
 
@@ -921,6 +1014,15 @@ def make_basic_motor_selective_stop_desmat(events_file, add_deriv,
         rt = make_regressor_and_derivative(
         n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
         amplitude_column="response_time", duration_column="constant_1_column",
+        subset=rt_subset, demean_amp=False, cond_id='response_time'
+        ) 
+        design_matrix = pd.concat([design_matrix, rt], axis=1)
+        contrasts["response_time"] = "response_time"
+    if regress_rt == 'rt_duration':
+        rt_subset = subset_main_regressors + " and trial_type!='crit_stop_success'"
+        rt = make_regressor_and_derivative(
+        n_scans=n_scans, tr=tr, events_df=events_df, add_deriv = add_deriv,
+        amplitude_column="constant_1_column", duration_column="response_time",
         subset=rt_subset, demean_amp=False, cond_id='response_time'
         ) 
         design_matrix = pd.concat([design_matrix, rt], axis=1)

@@ -178,7 +178,7 @@ def get_parser():
     )
     parser.add_argument(
         'regress_rt',
-        choices=['no_rt', 'rt_uncentered', 'rt_centered'],
+        choices=['no_rt', 'rt_uncentered', 'rt_centered', 'rt_duration', 'rt_duration_only'],
         help=('Use to specify how rt is/is not modeled. If rt_centered is used '
               'you will potentially have an RT confound in the group models')
     )
@@ -223,6 +223,8 @@ if __name__ == "__main__":
     design_matrix, contrasts, percent_junk, percent_high_motion, tr = make_desmat_contrasts(root, task, 
         files['events_file'], add_deriv, n_scans, files['confounds_file'], regress_rt
     )
+    design_matrix['constant'] = 1
+    design_matrix.drop(columns=['csf', 'white_matter'], inplace=True)
 
     exclusion, any_fail = qa_design_matrix(
         contrast_dir, contrasts, design_matrix, subid, task, percent_junk, 
@@ -231,6 +233,7 @@ if __name__ == "__main__":
     
     add_to_html_summary(subid, contrasts, design_matrix, contrast_dir, 
             regress_rt, task, any_fail, exclusion)
+
 
     if not any_fail and qa_only == False:
         fmri_glm = FirstLevelModel(tr,
@@ -248,3 +251,5 @@ if __name__ == "__main__":
                 f'_contrast.nii.gz')
             con_est  = out.compute_contrast(con, output_type = 'effect_size')
             con_est.to_filename(filename)
+
+

@@ -525,7 +525,7 @@ if __name__ == "__main__":
 
     outdir = Path(f"/oak/stanford/groups/russpold/data/uh2/aim1_mumford/output/"
               f"{task}_lev2_output/{task}_lev1_contrast_{lev1_contrast}_rtmod_{rtmodel}_"
-              f"lev2_model_{model_lev2}/")
+              f"lev2_model_{model_lev2}_new_omission/")
     if outdir.exists() and outdir.is_dir():
         shutil.rmtree(outdir)
     outdir.mkdir(parents=True)
