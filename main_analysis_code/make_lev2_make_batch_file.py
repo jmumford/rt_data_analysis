@@ -11,7 +11,8 @@ batch_stub = ('/oak/stanford/groups/russpold/data/uh2/aim1_mumford/'
 batch_outfile = ('/oak/stanford/groups/russpold/data/uh2/aim1_mumford/'
               'rt_data_analysis/main_analysis_code/make_lev2_batch_files.batch')
 
-all_cons = ['DPX:BX_rtdur-BY_rtdur:rt_duration_only']
+all_cons = ['DPX:AY_cue+AY_probe-BY_cue-BY_probe:rt_duration', 
+            'DPX:response_time:rt_duration']
 with open(batch_stub) as infile, open(batch_outfile, 'w') as outfile:
     for line in infile:
         line = line.replace('JOBNAME', 'batch_maker')
@@ -23,4 +24,5 @@ with open(batch_stub) as infile, open(batch_outfile, 'w') as outfile:
                 f"aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py {con} one_sampt \n"
                 f"/oak/stanford/groups/russpold/data/uh2/"
                 f"aim1_mumford/rt_data_analysis/main_analysis_code/analyze_lev2.py {con} one_sampt  \n")
+
 

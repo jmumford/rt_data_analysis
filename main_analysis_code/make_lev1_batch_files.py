@@ -32,11 +32,11 @@ rt_mapping = {
     'twoByTwo': ['rt_uncentered', 'no_rt', 'rt_duration'], 
     'WATT3': ['no_rt'],
     'discountFix': ['rt_uncentered', 'no_rt', 'rt_duration'], 
-    'DPX': ['rt_uncentered', 'no_rt', 'rt_duration'], 
+    'DPX': ['no_rt', 'rt_duration'], 
     'motorSelectiveStop': [ 'rt_uncentered', 'no_rt', 'rt_duration']
 }
 
-rt_mapping = {'DPX': ['rt_duration_only']}
+#rt_mapping = {'DPX': ['rt_duration_only']}
 
 subids = get_subids(root)
 
